@@ -10,23 +10,23 @@ public class Autoscaler implements Watcher {
     private static final int SESSION_TIMEOUT = 3000;
 
     // Parent Znode where each worker stores an ephemeral child to indicate it is alive
-    private static final String AUTOHEALER_ZNODES_PATH = "/workers";
+    private static final String AUTOSCALER_ZNODES_PATH = "/workers";
 
     // Path to the worker jar
-    private final String pathToProgram;
+    private final String pathToWorkerBinary;
 
     // The number of worker instances we need to maintain at all times
     private final int numberOfWorkers;
     private ZooKeeper zooKeeper;
 
-    public Autoscaler(int numberOfWorkers, String pathToProgram) {
+    public Autoscaler(int numberOfWorkers, String pathToWorkerBinary) {
         this.numberOfWorkers = numberOfWorkers;
-        this.pathToProgram = pathToProgram;
+        this.pathToWorkerBinary = pathToWorkerBinary;
     }
 
     public void startWatchingWorkers() throws KeeperException, InterruptedException {
-        if (zooKeeper.exists(AUTOHEALER_ZNODES_PATH, false) == null) {
-            zooKeeper.create(AUTOHEALER_ZNODES_PATH, new byte[]{}, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        if (zooKeeper.exists(AUTOSCALER_ZNODES_PATH, false) == null) {
+            zooKeeper.create(AUTOSCALER_ZNODES_PATH, new byte[]{}, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
         launchWorkersIfNecessary();
     }
@@ -64,10 +64,11 @@ public class Autoscaler implements Watcher {
         }
     }
 
+    /**
+     * Method to watch and launch new workers if necessary
+     */
     private void launchWorkersIfNecessary() {
-        /**
-         * Implement this method to watch and launch new workers if necessary
-         */
+
     }
 
     /**
@@ -75,7 +76,7 @@ public class Autoscaler implements Watcher {
      * @throws IOException
      */
     private void startNewWorker() throws IOException {
-        File file = new File(pathToProgram);
+        File file = new File(pathToWorkerBinary);
         String command = "java -jar " + file.getCanonicalPath();
         System.out.println(String.format("Launching worker instance : %s ", command));
         Runtime.getRuntime().exec(command, null, file.getParentFile());

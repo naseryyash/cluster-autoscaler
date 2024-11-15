@@ -13,7 +13,7 @@ public class Worker {
     private static final int SESSION_TIMEOUT = 3000;
 
     // Parent Znode where each worker stores an ephemeral child to indicate it is alive
-    private static final String AUTOHEALER_ZNODES_PATH = "/workers";
+    private static final String AUTOSCALER_ZNODES_PATH = "/workers";
 
     private static final float CHANCE_TO_FAIL = 0.1F;
 
@@ -39,7 +39,7 @@ public class Worker {
     }
 
     private void addChildZnode() throws KeeperException, InterruptedException {
-        zooKeeper.create(AUTOHEALER_ZNODES_PATH + "/worker_",
+        zooKeeper.create(AUTOSCALER_ZNODES_PATH + "/worker_",
                 new byte[]{},
                 ZooDefs.Ids.OPEN_ACL_UNSAFE,
                 CreateMode.EPHEMERAL_SEQUENTIAL);
