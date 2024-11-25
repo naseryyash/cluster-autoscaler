@@ -30,7 +30,9 @@ public class Worker {
 
         while (true) {
             System.out.println("Working...");
-            LockSupport.parkNanos(1000);
+            // Putting the thread to sleep to simulate process doing some
+            // work for some realistic time before having a chance to randomly die.
+            Thread.sleep(10000);
             if (random.nextFloat() < CHANCE_TO_FAIL) {
                 System.out.println("Critical error happened");
                 throw new RuntimeException("Oops");
