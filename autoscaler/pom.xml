@@ -30,7 +30,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>distributed.systems.Application</mainClass>
+                            <mainClass>Application</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

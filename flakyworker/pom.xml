@@ -52,7 +52,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>flaky.worker.Application</mainClass>
+                            <mainClass>Application</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
