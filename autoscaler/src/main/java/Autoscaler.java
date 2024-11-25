@@ -3,6 +3,7 @@ import org.apache.zookeeper.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class Autoscaler implements Watcher {
 
@@ -16,15 +17,15 @@ public class Autoscaler implements Watcher {
     private final String pathToWorkerBinary;
 
     // The number of worker instances we need to maintain at all times
-    private final int numberOfWorkers;
+    private final int minNumOfWorkers;
     private ZooKeeper zooKeeper;
 
-    public Autoscaler(int numberOfWorkers, String pathToWorkerBinary) {
-        this.numberOfWorkers = numberOfWorkers;
+    public Autoscaler(int minNumOfWorkers, String pathToWorkerBinary) {
+        this.minNumOfWorkers = minNumOfWorkers;
         this.pathToWorkerBinary = pathToWorkerBinary;
     }
 
-    public void startWatchingWorkers() throws KeeperException, InterruptedException {
+    public void startWatchingWorkers() throws KeeperException, InterruptedException, IOException {
         if (zooKeeper.exists(AUTOSCALER_ZNODES_PATH, false) == null) {
             zooKeeper.create(AUTOSCALER_ZNODES_PATH, new byte[]{}, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
@@ -58,17 +59,22 @@ public class Autoscaler implements Watcher {
                     }
                 }
                 break;
-            /**
-             * Add states code here to respond to the relevant events
-             */
+            case NodeChildrenChanged:
+                try {
+                    launchWorkersIfNecessary();
+                } catch (InterruptedException | KeeperException | IOException ignored) {
+                }
         }
     }
 
     /**
      * Method to watch and launch new workers if necessary
      */
-    private void launchWorkersIfNecessary() {
-
+    private void launchWorkersIfNecessary() throws InterruptedException, KeeperException, IOException {
+        List<String> children = zooKeeper.getChildren(AUTOSCALER_ZNODES_PATH, this);
+        if (null == children || children.size() < minNumOfWorkers) {
+            startNewWorker();
+        }
     }
 
     /**
